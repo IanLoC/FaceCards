@@ -40,8 +40,8 @@ class Shadower extends HTMLElement {
 window.customElements.define("shadower-e",Shadower);
 </script>
 <shadower-e></shadower-e>
-<input type="button" onClick="camOn()" value="camera on"/>
-<input type="button" onClick="camOff()" value="camera off"/>
+<input type="button" onClick="camera.on()" value="camera on"/>
+<input type="button" onClick="camera.off()" value="camera off"/>
 </body>
 </html>
 <script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
@@ -59,56 +59,62 @@ window.customElements.define("shadower-e",Shadower);
 </script>
 
 <script>
-// logon script
+// fblogon script
 var provider,token,user,name = null;
-function doFBLogon() {
-	provider = new firebase.auth.FacebookAuthProvider();
-	firebase.auth().signInWithPopup(provider).then(function(result){
-		if(result.credential) {
-			token = result.credential.accessToken;
-		}
-		user = result.user;
-		name = user.displayName;
-	}).catch(function(error){
-		var errorCode = error.code;
-		var errorMessage = error.message;
-		var email = error.email;
-		var credential = error.credential;
-	});
-}
-function doFBLogout() {
-	firebase.auth().signOut().then(()=> {
-		//other refresh scripts
-		console.log("user logged out");
-	}).catch(error=> {
-		console.error("failed to log out" + error);
-	});
-}
+const FB = {
+	'logon': ()=> {
+		provider = new firebase.auth.FacebookAuthProvider();
+		firebase.auth().signInWithPopup(provider).then(result =>{
+			if(result.credential) {
+				token = result.credential.accessToken;
+			}
+			user = result.user;
+			name = user.displayName;
+		}).catch(error =>{
+			let errorCode = error.code;
+			let errorMessage = error.message;
+			let email = error.email;
+			let credential = error.credential;
+		});
+	},
+	'logout': ()=> {
+		firebase.auth().signOut().then(()=> {
+			//other refresh scripts
+			console.log("user logged out");
+		}).catch(error => {
+			console.error("failed to log out" + error);
+		});
+	},
+};
+
 </script>
 <script>
-var localstream;
-function camOn() {
-    if(navigator.mediaDevices!=null) {
-    	var options = {
-    		video:true,
-    		audio:false
-    	};
-    	navigator.mediaDevices.getUserMedia(options).then(
-    		function(stream) {
-    			var video = document.querySelector('video#videoElement');
-    			localstream = stream;
-    			video.srcObject = stream;
-    		}).catch(
-    		function(e) {
-    			console.log("There was a problem with webkitGetUserMedia");
-    		});
-    }
-}
-function camOff() {
-	var video = document.querySelector('video#videoElement');
-	video.pause();
-	video.src = "";
-	video.srcObject = null;
-	localstream.getTracks()[0].stop();
-}
+//camera scripts
+var localstream = null;
+const camera = {
+	'on': ()=>{
+		if(navigator.mediaDevices!=null) {
+			var options = {
+				video:true,
+				audio:false
+			};
+			navigator.mediaDevices.getUserMedia(options).then(
+				function(stream) {
+					var video = document.querySelector('video#videoElement');
+					localstream = stream;
+					video.srcObject = stream;
+				}).catch(
+				function(e) {
+					console.log("There was a problem with webkitGetUserMedia");
+				});
+		}
+	},
+	'off': ()=> {
+		var video = document.querySelector('video#videoElement');
+		video.pause();
+		video.src = "";
+		video.srcObject = null;
+		localstream.getTracks()[0].stop();
+	},
+};
 </script>
