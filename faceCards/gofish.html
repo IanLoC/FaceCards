@@ -71,10 +71,10 @@ const FB = {
 			user = result.user;
 			name = user.displayName;
 		}).catch(error =>{
-			let errorCode = error.code;
-			let errorMessage = error.message;
-			let email = error.email;
-			let credential = error.credential;
+			var errorCode = error.code;
+			var errorMessage = error.message;
+			var email = error.email;
+			var credential = error.credential;
 		});
 	},
 	'logout': ()=> {
