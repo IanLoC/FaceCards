@@ -57,6 +57,34 @@ window.customElements.define("shadower-e",Shadower);
   };
   firebase.initializeApp(config);
 </script>
+
+<script>
+// logon script
+var provider,token,user,name = null;
+function doFBLogon() {
+	provider = new firebase.auth.FacebookAuthProvider();
+	firebase.auth().signInWithPopup(provider).then(function(result){
+		if(result.credential) {
+			token = result.credential.accessToken;
+		}
+		user = result.user;
+		name = user.displayName;
+	}).catch(function(error){
+		var errorCode = error.code;
+		var errorMessage = error.message;
+		var email = error.email;
+		var credential = error.credential;
+	});
+}
+function doFBLogout() {
+	firebase.auth().signOut().then(()=> {
+		//other refresh scripts
+		console.log("user logged out");
+	}).catch(error=> {
+		console.error("failed to log out" + error);
+	});
+}
+</script>
 <script>
 var localstream;
 function camOn() {
