@@ -1,10 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="utf-8">
-<meta content="stuff, to, help, search, engines, not" name="keywords">
-<meta content="What this page is about." name="description">
-<meta content="Display Webcam Stream" name="title">
 <title>Display Webcam Stream</title>
   
 <style>
@@ -20,6 +17,7 @@
     background-color: #666;
 }
 </style>
+<link rel="stylesheet" type="text/css" href="generalstyle.css"/>
 </head>
   
 <body>
@@ -28,27 +26,56 @@
      
     </video>
 </div>
-<input type="button" onClick="camOff()"/>
+<p id="hostElement"></p>
+<script>
+class Shadower extends HTMLElement {
+	constructor() {
+		super();
+		this._root = this.attachShadow({mode:"closed"});
+	}
+	connectedCallback() {
+		this._root.innerHTML = `hi`;
+	}
+}
+window.customElements.define("shadower-e",Shadower);
+</script>
+<shadower-e></shadower-e>
+<input type="button" onClick="camOn()" value="camera on"/>
+<input type="button" onClick="camOff()" value="camera off"/>
 </body>
 </html>
+<script src="https://www.gstatic.com/firebasejs/4.7.0/firebase.js"></script>
+<script>
+  // Initialize Firebase
+  var config = {
+    apiKey: "AIzaSyBwSrZwOVLJyIgeLV7rss7l36kCMh2xZl8",
+    authDomain: "f-ace-ee30c.firebaseapp.com",
+    databaseURL: "https://f-ace-ee30c.firebaseio.com",
+    projectId: "f-ace-ee30c",
+    storageBucket: "f-ace-ee30c.appspot.com",
+    messagingSenderId: "246150362647"
+  };
+  firebase.initializeApp(config);
+</script>
 <script>
 var localstream;
-if(navigator.mediaDevices!=null) {
-	var options = {
-		video:true,
-		audio:false
-	};
-	navigator.mediaDevices.getUserMedia(options).then(
-		function(stream) {
-			var video = document.querySelector('video#videoElement');
-			localstream = stream;
-			video.srcObject = stream;
-		}).catch(
-		function(e) {
-			console.log("There was a problem with webkitGetUserMedia");
-		});
+function camOn() {
+    if(navigator.mediaDevices!=null) {
+    	var options = {
+    		video:true,
+    		audio:false
+    	};
+    	navigator.mediaDevices.getUserMedia(options).then(
+    		function(stream) {
+    			var video = document.querySelector('video#videoElement');
+    			localstream = stream;
+    			video.srcObject = stream;
+    		}).catch(
+    		function(e) {
+    			console.log("There was a problem with webkitGetUserMedia");
+    		});
+    }
 }
-
 function camOff() {
 	var video = document.querySelector('video#videoElement');
 	video.pause();
