@@ -56,20 +56,31 @@ window.customElements.define("shadower-e",Shadower);
     messagingSenderId: "246150362647"
   };
   firebase.initializeApp(config);
+  
+  var database = firebase.database();
 </script>
 
 <script>
 // fblogon script
-var provider,token,user,name = null;
+var provider,token,luser,name,pfpurl,uid = null;
 const FB = {
 	'logon': ()=> {
+		console.log("called logon");
 		provider = new firebase.auth.FacebookAuthProvider();
 		firebase.auth().signInWithPopup(provider).then(result =>{
 			if(result.credential) {
 				token = result.credential.accessToken;
 			}
-			user = result.user;
-			name = user.displayName;
+			luser = result.user;
+			name = luser.displayName;
+			pfpurl = luser.photoURL;
+			uid = luser.uid;
+			(token) => {
+			database.ref('users/' + uid).set({
+				active_token: token,
+				picture: pfpurl
+			});
+		}
 		}).catch(error =>{
 			var errorCode = error.code;
 			var errorMessage = error.message;
@@ -87,6 +98,29 @@ const FB = {
 	},
 };
 
+firebase.auth().onAuthStateChanged(user => {
+	if(user) {
+		//retrieve saved data
+		luser = user;
+		name = user.displayName;
+		pfpurl = user.photoURL;
+		provider = user.providerData;
+		uid = user.uid;
+		
+		//online detection
+		let count = database.ref('active_players/');
+		var connectionRef = database.ref(".info/connected");
+		connectionRef.on('value', snap => {
+			if(snap.val() === true) {
+				var con = count.push();
+				
+				con.onDisconnect().remove();
+				
+				con.set(true);
+			}
+		});
+	}
+});
 </script>
 <script>
 //camera scripts
@@ -105,7 +139,7 @@ const camera = {
 					video.srcObject = stream;
 				}).catch(
 				function(e) {
-					console.log("There was a problem with webkitGetUserMedia");
+					console.log("There was a problem with getUserMedia");
 				});
 		}
 	},
